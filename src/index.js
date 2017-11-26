@@ -32,6 +32,9 @@ export default class CSRF {
     if (typeof this.opts.disableQuery !== 'boolean')
       this.opts.disableQuery = false;
 
+    if (typeof this.opts.invalidTokenCallback !== 'function')
+      this.opts.invalidTokenCallback = function () { return true }
+
     this.tokens = csrf(opts);
 
     return this.middleware;
@@ -81,13 +84,13 @@ export default class CSRF {
       || ctx.get('x-csrf-token')
       || ctx.get('x-xsrf-token');
 
-    if (!token)
+    if (!token && this.opts.invalidTokenCallback())
       return ctx.throw(
         this.opts.invalidTokenStatusCode,
         this.opts.invalidTokenMessage
       );
 
-    if (!this.tokens.verify(ctx.session.secret, token))
+    if (!this.tokens.verify(ctx.session.secret, token) && this.opts.invalidTokenCallback())
       return ctx.throw(
         this.opts.invalidTokenStatusCode,
         this.opts.invalidTokenMessage
