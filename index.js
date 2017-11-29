@@ -54,9 +54,9 @@ function CSRF(opts) {
 
     var token = bodyToken || !_this.opts.disableQuery && ctx.query && ctx.query._csrf || ctx.get('csrf-token') || ctx.get('xsrf-token') || ctx.get('x-csrf-token') || ctx.get('x-xsrf-token');
 
-    if (!token && _this.opts.invalidTokenCallback()) return ctx.throw(_this.opts.invalidTokenStatusCode, _this.opts.invalidTokenMessage);
+    if (!token && _this.opts.invalidTokenCallback(ctx, token)) return ctx.throw(_this.opts.invalidTokenStatusCode, _this.opts.invalidTokenMessage);
 
-    if (!_this.tokens.verify(ctx.session.secret, token) && _this.opts.invalidTokenCallback()) return ctx.throw(_this.opts.invalidTokenStatusCode, _this.opts.invalidTokenMessage);
+    if (!_this.tokens.verify(ctx.session.secret, token) && _this.opts.invalidTokenCallback(ctx, token)) return ctx.throw(_this.opts.invalidTokenStatusCode, _this.opts.invalidTokenMessage);
 
     return next();
   };
